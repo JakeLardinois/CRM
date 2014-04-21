@@ -9,6 +9,7 @@ using System.Windows.Forms;
 
 using Xrm;
 using CRM.Models;
+using System.IO;
 
 
 namespace CRM
@@ -38,10 +39,16 @@ namespace CRM
 
             xrm = new XrmServiceContext("Xrm");
 
-            foreach (Lead objLead in Leads)
-                xrm.AddObject(objLead);
-
-            xrm.SaveChanges();
+            foreach (MyLead objLead in Leads)
+            {
+                //xrm.AddObject(objLead);
+                Guid objLeadGuid = xrm.Create(objLead);//Using this method as opposed to xrm.AddObject results in getting the GUID required to add a note to the lead.
+                                                        //This method also adds the Lead Object to the Db.
+                objLead.Note.ObjectId = new Microsoft.Xrm.Client.CrmEntityReference("lead", objLeadGuid); //Creates the xref between the Annotation object (the note) and the lead
+                xrm.AddObject(objLead.Note); //adds the note to the CRM Database..
+            }
+                
+            xrm.SaveChanges();//this saves all the notes to the database.  The leads are automatically saved by calling the Create() method...
         }
 
         private void bw_RunWorkerCompleted(object sender, RunWorkerCompletedEventArgs e)
@@ -87,8 +94,14 @@ namespace CRM
 
         private void btnViewData_Click(object sender, EventArgs e)
         {
-            Leads = new Leads(txtFilePath.Text, cmbRangeList.Text);
-            dgvLeads.DataSource = Leads;
+            if (File.Exists(txtFilePath.Text) && !string.IsNullOrEmpty(txtFilePath.Text))
+            {
+                Leads = new Leads(txtFilePath.Text, cmbRangeList.Text);
+                dgvLeads.DataSource = Leads;
+            }
+            else
+                MessageBox.Show("The file does not exist...", "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            
         }
 
         private void btnUpload_Click(object sender, EventArgs e)
