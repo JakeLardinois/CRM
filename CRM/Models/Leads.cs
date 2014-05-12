@@ -92,9 +92,9 @@ namespace CRM.Models
                     FirstName = objItem.Field<string>("Q1"),
                     LastName = objItem.Field<string>("Q2"),
                     EMailAddress1 = objItem.Field<string>("Q3"),
-                    Description = "A description Here",
+                    //Description = "A description Here",
                     Note = objAnnotation,
-                    LeadSourceCode = 100000000
+                    LeadSourceCode = 100000003
                 };
 
                 this.Add(objLead);
